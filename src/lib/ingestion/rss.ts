@@ -57,18 +57,18 @@ function isPrivateIp(address: string): boolean {
   const version = isIP(address);
   if (version === 4) {
     const [a, b] = address.split(".").map(Number);
-    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a >= 224);
+    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224;
   }
   if (version === 6) {
     const normalized = address.toLowerCase();
     return normalized === "::1" || normalized === "::" || normalized.startsWith("fc") || normalized.startsWith("fd") || normalized.startsWith("fe8") || normalized.startsWith("fe9") || normalized.startsWith("fea") || normalized.startsWith("feb");
   }
-  return true;
+  return false;
 }
 
 async function assertPublicUrl(rawUrl: string): Promise<URL> {
   const parsed = new URL(feedUrlSchema.parse(rawUrl));
-  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error("Only HTTP and HTTPS feed URLs are allowed.");
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Only HTTP and HTTPS feed URLs are allowed.");
   const hostname = parsed.hostname.toLowerCase();
   if (hostname === "localhost" || hostname.endsWith(".local") || isPrivateIp(hostname)) throw new Error("Private network feed URLs are not allowed.");
   const addresses = await lookup(hostname, { all: true, verbatim: true });
