@@ -1,0 +1,29 @@
+name: Database CI
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-ci.yml"
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.84.2
+      - name: Start fresh database and apply migrations
+        run: supabase db start
+      - name: Lint database schema
+        run: supabase db lint --local --level warning
+      - name: Stop local database
+        if: always()
+        run: supabase stop --no-backup
