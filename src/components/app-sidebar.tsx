@@ -1,17 +1,19 @@
 import Link from "next/link";
-import { Bot, Globe2, LayoutDashboard, Newspaper, Radar, Settings2, Workflow } from "lucide-react";
+import { Bot, FileCheck2, Globe2, LayoutDashboard, Newspaper, Radar, Send, Settings2, Workflow } from "lucide-react";
 
 const items = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Pipeline", icon: Workflow },
-  { href: "/sources", label: "Sources", icon: Globe2 },
-  { href: "/topics", label: "Topics", icon: Radar },
-  { href: "/content", label: "Content", icon: Newspaper },
-  { href: "/automations", label: "Automations", icon: Bot },
-];
+  { href: "/", label: "Overview", key: "overview", icon: LayoutDashboard },
+  { href: "/pipeline", label: "Pipeline", key: "pipeline", icon: Workflow },
+  { href: "/sources", label: "Sources", key: "sources", icon: Globe2 },
+  { href: "/topics", label: "Topics", key: "topics", icon: Radar },
+  { href: "/content", label: "Content", key: "content", icon: Newspaper },
+  { href: "/approvals", label: "Approvals", key: "approvals", icon: FileCheck2 },
+  { href: "/publishing", label: "Publishing", key: "publishing", icon: Send },
+  { href: "/automations", label: "Automations", key: "automations", icon: Bot },
+] as const;
 
 type AppSidebarProps = {
-  active: "overview" | "pipeline" | "sources" | "topics" | "content" | "automations";
+  active: typeof items[number]["key"];
 };
 
 export function AppSidebar({ active }: AppSidebarProps) {
@@ -22,8 +24,8 @@ export function AppSidebar({ active }: AppSidebarProps) {
         <span><strong>NicheFlow</strong><small>OS</small></span>
       </Link>
       <nav>
-        {items.map(({ href, label, icon: Icon }) => (
-          <Link className={active === label.toLowerCase() ? "active" : undefined} href={href} key={href}>
+        {items.map(({ href, label, key, icon: Icon }) => (
+          <Link className={active === key ? "active" : undefined} href={href} key={href}>
             <Icon size={18} />{label}
           </Link>
         ))}
