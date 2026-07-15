@@ -28,11 +28,14 @@ NicheFlow OS turns trusted industry sources into governed, SEO-ready content thr
 - `/` — Operations overview
 - `/sources` — Sources Manager
 - `/topics` — Topic opportunity pipeline
-- `/content` — Content Studio
+- `/content` — Versioned Content Studio
+- `/approvals` — Human review and approval queue
+- `/publishing` — Approved exports and publishing history
 - `/pipeline` — Execution map and run history
 - `/automations` — Workflow rules and safeguards
 - `/login` — Account access
 - `/onboarding` — Organization and workspace creation
+- `/api/health` — Runtime deployment status
 
 ## Browser-only development
 
@@ -53,12 +56,20 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Apply the SQL files in `supabase/migrations` in filename order. Authentication and protected routes activate automatically when both Supabase variables exist. Without them, the interface remains accessible in safe demo mode.
+Authentication and protected routes activate automatically when both Supabase variables exist. Without them, the interface remains accessible in safe demo mode.
+
+The repository includes:
+
+- Database migration CI against a fresh local Supabase stack
+- A manual `Deploy Database` GitHub Action for the production project
+- Security headers and a no-cache health endpoint
+- Exact browser-only production steps in [`DEPLOYMENT.md`](DEPLOYMENT.md)
 
 ## Validation
 
 ```bash
+npm run typecheck
 npm run build
 ```
 
-GitHub Actions runs the production build for every pull request update.
+GitHub Actions validates the application and all database migrations before deployment changes can merge.
