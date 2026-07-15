@@ -54,3 +54,64 @@ with check (public.has_organization_role(public.workspace_organization_id(worksp
 create policy "admins update publishing jobs" on public.publishing_jobs for update
 using (public.has_organization_role(public.workspace_organization_id(workspace_id), array['owner', 'admin']::public.organization_role[]))
 with check (public.has_organization_role(public.workspace_organization_id(workspace_id), array['owner', 'admin']::public.organization_role[]));
+
+create or replace function public.decide_approval_request(
+  target_request_id uuid,
+  requested_decision public.approval_status,
+  reviewer_note text default ''
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  request_row public.approval_requests%rowtype;
+  target_organization_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication is required.';
+  end if;
+
+  if requested_decision not in ('approved', 'changes_requested') then
+    raise exception 'Decision must be approved or changes_requested.';
+  end if;
+
+  select * into request_row
+  from public.approval_requests
+  where id = target_request_id
+    and status = 'pending'
+  for update;
+
+  if request_row.id is null then
+    raise exception 'Pending approval request not found.';
+  end if;
+
+  target_organization_id := public.workspace_organization_id(request_row.workspace_id);
+  if not public.has_organization_role(target_organization_id, array['owner', 'admin', 'reviewer']::public.organization_role[]) then
+    raise exception 'Reviewer permission is required.';
+  end if;
+
+  update public.approval_requests
+  set status = requested_decision,
+      reviewer_id = auth.uid(),
+      decision_note = left(coalesce(reviewer_note, ''), 2000),
+      decided_at = now()
+  where id = request_row.id;
+
+  if requested_decision = 'approved' then
+    update public.content_documents
+    set status = 'approved', approved_by = auth.uid(), approved_at = now()
+    where id = request_row.document_id;
+  else
+    update public.content_documents
+    set status = 'changes_requested', approved_by = null, approved_at = null
+    where id = request_row.document_id;
+  end if;
+
+  return request_row.document_id;
+end;
+$$;
+
+revoke all on function public.decide_approval_request(uuid, public.approval_status, text) from public;
+grant execute on function public.decide_approval_request(uuid, public.approval_status, text) to authenticated;
