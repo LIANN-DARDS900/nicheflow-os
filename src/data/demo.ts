@@ -25,6 +25,20 @@ export type TopicRecord = {
   stage: TopicStage;
 };
 
+export type ContentStage = "brief" | "draft" | "review" | "approved";
+
+export type ContentRecord = {
+  id: string;
+  title: string;
+  keyword: string;
+  intent: string;
+  stage: ContentStage;
+  seoScore: number;
+  words: number;
+  updated: string;
+  owner: string;
+};
+
 export const demoSources: SourceRecord[] = [
   { id: "anrt", name: "ANRT Morocco", domain: "anrt.ma", type: "Institution", pillar: "Connectivity & regulation", cadence: "Every 6 hours", lastRun: "12 min ago", items: 38, status: "healthy" },
   { id: "add", name: "Digital Development Agency", domain: "add.gov.ma", type: "Institution", pillar: "Digital public policy", cadence: "Every 12 hours", lastRun: "41 min ago", items: 24, status: "healthy" },
@@ -40,4 +54,11 @@ export const demoTopics: TopicRecord[] = [
   { id: "subsea-cables", title: "New subsea cable routes strengthen Morocco's digital position", source: "ITU Development", pillar: "International networks", score: 85, freshness: 86, authority: 89, stage: "qualified" },
   { id: "sovereignty", title: "Data sovereignty and cybersecurity requirements for Moroccan operators", source: "Ministry of Digital Transition", pillar: "Policy & security", score: 81, freshness: 79, authority: 94, stage: "discovered" },
   { id: "rural-connectivity", title: "Rural connectivity programmes and the next universal-service priorities", source: "ANRT Morocco", pillar: "Digital inclusion", score: 77, freshness: 82, authority: 91, stage: "discovered" },
+];
+
+export const demoContent: ContentRecord[] = [
+  { id: "article-5g", title: "What Morocco's 5G rollout means for enterprises and public services", keyword: "5G Morocco enterprises", intent: "Informational", stage: "brief", seoScore: 78, words: 0, updated: "9 min ago", owner: "Ilyas Nazih" },
+  { id: "article-cloud", title: "Morocco's data-centre expansion: capacity, sovereignty and opportunity", keyword: "data centers Morocco", intent: "Commercial research", stage: "draft", seoScore: 86, words: 1240, updated: "37 min ago", owner: "Ilyas Nazih" },
+  { id: "article-cables", title: "How subsea cables are strengthening Morocco's digital gateway position", keyword: "Morocco subsea cables", intent: "Informational", stage: "review", seoScore: 91, words: 1680, updated: "2 hours ago", owner: "Ilyas Nazih" },
+  { id: "article-security", title: "A practical guide to data sovereignty for Moroccan infrastructure operators", keyword: "data sovereignty Morocco", intent: "Decision support", stage: "approved", seoScore: 94, words: 1920, updated: "Yesterday", owner: "Ilyas Nazih" },
 ];
