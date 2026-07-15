@@ -8,6 +8,8 @@ NicheFlow OS turns trusted industry sources into governed, SEO-ready content thr
 
 `Sources → Ingestion → Extraction → Scoring → Niche Matching → Brief → Draft → SEO → Approval → Publishing`
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLIANN-DARDS900%2Fnicheflow-os&env=NEXT_PUBLIC_SUPABASE_URL%2CNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY%2CNEXT_PUBLIC_SITE_URL&project-name=nicheflow-os&repository-name=nicheflow-os)
+
 ## Demo workspace
 
 - **Market:** Morocco
@@ -62,8 +64,14 @@ The repository includes:
 
 - Database migration CI against a fresh local Supabase stack
 - A manual `Deploy Database` GitHub Action for the production project
+- One-click Vercel project import with required environment variables
+- A browser-triggered `Verify Production` workflow
 - Security headers and a no-cache health endpoint
 - Exact browser-only production steps in [`DEPLOYMENT.md`](DEPLOYMENT.md)
+
+## Production verification
+
+After deployment, open **GitHub Actions → Verify Production → Run workflow**, paste the Vercel URL, and run it. The check fails unless `/api/health` reports both `status: ready` and `mode: live`.
 
 ## Validation
 
