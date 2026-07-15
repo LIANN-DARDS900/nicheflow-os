@@ -1,6 +1,7 @@
 import { Workflow } from "lucide-react";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { signIn, signUp } from "./actions";
+import "./login.css";
 
 type Props = {
   searchParams: Promise<{ error?: string; message?: string }>;
