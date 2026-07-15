@@ -8,14 +8,16 @@ export type ExportDocument = {
   primaryKeyword: string;
 };
 
+const htmlEntities: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#039;",
+};
+
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  })[character] ?? character);
+  return value.replace(/[&<>"']/g, (character) => htmlEntities[character] ?? character);
 }
 
 function inlineMarkdown(value: string): string {
