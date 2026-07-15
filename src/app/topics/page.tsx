@@ -1,5 +1,6 @@
 import { ArrowUpRight, CheckCircle2, Filter, Radar, Search, Sparkles } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { promoteTopicToBrief } from "@/app/content/actions";
 import { listWorkspaceTopics } from "@/lib/data/workspace";
 import { scoreWorkspaceItems } from "./actions";
 
@@ -49,23 +50,26 @@ export default async function TopicsPage({ searchParams }: Props) {
             <div className="emptyState"><Radar size={24} /><strong>No topics evaluated</strong><span>Run ingestion and scoring to populate the opportunity pipeline.</span></div>
           ) : (
             <div className="topicCards">
-              {topics.map((topic) => (
-                <article className="topicCard" key={topic.id}>
-                  <div className="topicScore"><strong>{topic.score}</strong><small>score</small></div>
-                  <div className="topicMain">
-                    <div className="topicMeta"><span>{topic.pillar}</span><span>•</span><span>{topic.source}</span></div>
-                    <h3>{topic.title}</h3>
-                    <div className="signalBars">
-                      <label><span>Freshness</span><b><i style={{ width: `${topic.freshness}%` }} /></b><em>{topic.freshness}</em></label>
-                      <label><span>Authority</span><b><i style={{ width: `${topic.authority}%` }} /></b><em>{topic.authority}</em></label>
+              {topics.map((topic) => {
+                const promotable = live && (topic.stage === "qualified" || topic.stage === "brief-ready");
+                return (
+                  <article className="topicCard" key={topic.id}>
+                    <div className="topicScore"><strong>{topic.score}</strong><small>score</small></div>
+                    <div className="topicMain">
+                      <div className="topicMeta"><span>{topic.pillar}</span><span>•</span><span>{topic.source}</span></div>
+                      <h3>{topic.title}</h3>
+                      <div className="signalBars">
+                        <label><span>Freshness</span><b><i style={{ width: `${topic.freshness}%` }} /></b><em>{topic.freshness}</em></label>
+                        <label><span>Authority</span><b><i style={{ width: `${topic.authority}%` }} /></b><em>{topic.authority}</em></label>
+                      </div>
                     </div>
-                  </div>
-                  <div className="topicDecision">
-                    <span className={`stageChip ${topic.stage}`}><CheckCircle2 size={13} />{stageLabel[topic.stage]}</span>
-                    <button className="rowMenu" aria-label={`Open ${topic.title}`}><ArrowUpRight size={18} /></button>
-                  </div>
-                </article>
-              ))}
+                    <div className="topicDecision">
+                      <span className={`stageChip ${topic.stage}`}><CheckCircle2 size={13} />{stageLabel[topic.stage]}</span>
+                      <form action={promoteTopicToBrief}><input name="topicId" type="hidden" value={topic.id} /><button className="rowMenu" disabled={!promotable} aria-label={`Create brief from ${topic.title}`}><ArrowUpRight size={18} /></button></form>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
