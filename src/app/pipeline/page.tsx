@@ -1,5 +1,7 @@
-import { CheckCircle2, Clock3, Database, FileCheck2, Globe2, Newspaper, Play, Radar, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, CheckCircle2, Clock3, Database, FileCheck2, Globe2, Newspaper, Play, Radar, Sparkles } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { listWorkflowRuns } from "@/lib/data/workspace";
 import "./pipeline.css";
 
 const engines = [
@@ -11,24 +13,22 @@ const engines = [
   { name: "Approval", detail: "Require editorial validation before publishing", status: "Ready", icon: FileCheck2 },
 ];
 
-const recentRuns = [
-  { id: "DEMO-004", started: "13:42", duration: "18s", items: 46, opportunities: 5, status: "Completed" },
-  { id: "DEMO-003", started: "12:40", duration: "15s", items: 39, opportunities: 4, status: "Completed" },
-  { id: "DEMO-002", started: "11:38", duration: "21s", items: 52, opportunities: 7, status: "Completed" },
-];
+export default async function PipelinePage() {
+  const { records: recentRuns, mode, error } = await listWorkflowRuns();
 
-export default function PipelinePage() {
   return (
     <main className="shell">
       <AppSidebar active="pipeline" />
       <section className="workspace">
         <header>
-          <div><p className="eyebrow">ORCHESTRATION CONTROL</p><h1>Pipeline executions</h1><p className="muted">Inspect every engine, handoff and result in the content workflow.</p></div>
-          <button className="primary"><Play size={16} />Run demo pipeline</button>
+          <div><p className="eyebrow">ORCHESTRATION CONTROL · {mode.toUpperCase()} DATA</p><h1>Pipeline executions</h1><p className="muted">Inspect every engine, handoff and result in the content workflow.</p></div>
+          <Link className="primary" href="/sources"><Play size={16} />Run ingestion</Link>
         </header>
 
+        {error && <div className="errorNotice">Workflow history could not be loaded: {error}</div>}
+
         <section className="panel enginePanel">
-          <div className="panelHead"><div><p className="eyebrow">ENGINE MAP</p><h2>Controlled orchestration path</h2></div><span className="modeChip">Demo mode</span></div>
+          <div className="panelHead"><div><p className="eyebrow">ENGINE MAP</p><h2>Controlled orchestration path</h2></div><span className="modeChip">{mode === "demo" ? "Demo mode" : "Live workspace"}</span></div>
           <div className="engineGrid">
             {engines.map(({ name, detail, status, icon: Icon }, index) => (
               <article className="engineCard" key={name}>
@@ -41,12 +41,19 @@ export default function PipelinePage() {
         </section>
 
         <section className="panel runsPanel">
-          <div className="panelHead"><div><p className="eyebrow">EXECUTION HISTORY</p><h2>Recent runs</h2></div><button className="iconText"><Clock3 size={15} />Last 24 hours</button></div>
-          <div className="runRows">
-            {recentRuns.map((run) => (
-              <article key={run.id}><span className="runId">{run.id}</span><span><small>Started</small><strong>{run.started}</strong></span><span><small>Duration</small><strong>{run.duration}</strong></span><span><small>Items</small><strong>{run.items}</strong></span><span><small>Opportunities</small><strong>{run.opportunities}</strong></span><span className="completed"><CheckCircle2 size={14} />{run.status}</span></article>
-            ))}
-          </div>
+          <div className="panelHead"><div><p className="eyebrow">EXECUTION HISTORY</p><h2>Recent runs</h2></div><button className="iconText"><Clock3 size={15} />Latest 20</button></div>
+          {recentRuns.length === 0 ? (
+            <div className="emptyState"><Clock3 size={24} /><strong>No workflow runs</strong><span>Run source ingestion to create the first auditable execution.</span></div>
+          ) : (
+            <div className="runRows">
+              {recentRuns.map((run) => {
+                const failed = run.status === "Failed" || run.status === "Cancelled";
+                return (
+                  <article key={run.id}><span className="runId">{run.id}</span><span><small>Started</small><strong>{run.started}</strong></span><span><small>Duration</small><strong>{run.duration}</strong></span><span><small>Inputs</small><strong>{run.items}</strong></span><span><small>Opportunities</small><strong>{run.opportunities}</strong></span><span className={failed ? "failed" : "completed"}>{failed ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}{run.status}</span></article>
+                );
+              })}
+            </div>
+          )}
         </section>
       </section>
     </main>
