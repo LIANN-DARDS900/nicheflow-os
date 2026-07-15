@@ -1,6 +1,7 @@
 import { ArrowUpRight, FileText, Filter, Plus, Search, Sparkles } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { demoContent } from "@/data/demo";
+import "./content.css";
 
 const stageLabels = { brief: "Brief", draft: "Draft", review: "In review", approved: "Approved" };
 
