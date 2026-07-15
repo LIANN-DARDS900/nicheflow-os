@@ -1,6 +1,7 @@
 import { ArrowUpRight, CheckCircle2, Filter, Radar, Search, Sparkles } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { listWorkspaceTopics } from "@/lib/data/workspace";
+import { scoreWorkspaceItems } from "./actions";
 
 const stageLabel = {
   discovered: "Discovered",
@@ -9,12 +10,16 @@ const stageLabel = {
   rejected: "Rejected",
 };
 
-export default async function TopicsPage() {
-  const { records: topics, mode, error } = await listWorkspaceTopics();
+type Props = { searchParams: Promise<{ error?: string; message?: string }> };
+
+export default async function TopicsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const { records: topics, mode, error: dataError } = await listWorkspaceTopics();
   const qualified = topics.filter((topic) => topic.stage === "qualified" || topic.stage === "brief-ready").length;
   const averageScore = topics.length ? Math.round(topics.reduce((total, topic) => total + topic.score, 0) / topics.length) : 0;
   const acceptance = topics.length ? Math.round((qualified / topics.length) * 100) : 0;
   const briefsReady = topics.filter((topic) => topic.stage === "brief-ready").length;
+  const live = mode === "live";
 
   return (
     <main className="shell">
@@ -22,10 +27,11 @@ export default async function TopicsPage() {
       <section className="workspace">
         <header>
           <div><p className="eyebrow">TOPIC INTELLIGENCE · {mode.toUpperCase()} DATA</p><h1>Opportunity pipeline</h1><p className="muted">Review explainable relevance scores before content production begins.</p></div>
-          <div className="headerActions"><button className="secondary"><Filter size={16} />Filter</button><button className="primary"><Sparkles size={17} />Score new items</button></div>
+          <div className="headerActions"><button className="secondary"><Filter size={16} />Filter</button><form action={scoreWorkspaceItems}><button className="primary" disabled={!live}><Sparkles size={17} />Score new items</button></form></div>
         </header>
 
-        {error && <div className="errorNotice">Topic data could not be loaded: {error}</div>}
+        {(params.error || dataError) && <div className="errorNotice">{params.error ?? `Topic data could not be loaded: ${dataError}`}</div>}
+        {params.message && <div className="successNotice">{params.message}</div>}
 
         <section className="metrics compactMetrics">
           <article><span>Topics evaluated</span><strong>{topics.length}</strong><small>{mode === "demo" ? "Current demo run" : "Persisted workspace topics"}</small></article>
