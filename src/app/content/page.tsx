@@ -1,15 +1,19 @@
+import Link from "next/link";
 import { ArrowUpRight, FileText, Filter, Plus, Search, Sparkles } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { listWorkspaceContent } from "@/lib/data/workspace";
 import "./content.css";
 
 const stageLabels = { brief: "Brief", draft: "Draft", review: "In review", approved: "Approved" };
+type Props = { searchParams: Promise<{ error?: string; message?: string }> };
 
-export default async function ContentPage() {
+export default async function ContentPage({ searchParams }: Props) {
+  const params = await searchParams;
   const { records: content, mode, error } = await listWorkspaceContent();
   const averageSeo = content.length ? Math.round(content.reduce((total, item) => total + item.seoScore, 0) / content.length) : 0;
   const awaitingReview = content.filter((item) => item.stage === "review").length;
   const approved = content.filter((item) => item.stage === "approved").length;
+  const live = mode === "live";
 
   return (
     <main className="shell">
@@ -17,10 +21,11 @@ export default async function ContentPage() {
       <section className="workspace">
         <header>
           <div><p className="eyebrow">CONTENT PRODUCTION · {mode.toUpperCase()} DATA</p><h1>Content Studio</h1><p className="muted">Move qualified opportunities through briefs, drafts, review and approval.</p></div>
-          <div className="headerActions"><button className="secondary"><Sparkles size={16} />Generate brief</button><button className="primary"><Plus size={17} />New document</button></div>
+          <div className="headerActions"><Link className="secondary" href="/topics"><Sparkles size={16} />Generate brief</Link><Link className={`primary${live ? "" : " disabledAction"}`} href={live ? "/topics" : "/login"}><Plus size={17} />New document</Link></div>
         </header>
 
-        {error && <div className="errorNotice">Content data could not be loaded: {error}</div>}
+        {(params.error || error) && <div className="errorNotice">{params.error ?? `Content data could not be loaded: ${error}`}</div>}
+        {params.message && <div className="successNotice">{params.message}</div>}
 
         <section className="metrics compactMetrics">
           <article><span>Active documents</span><strong>{content.length}</strong><small>Across the editorial workflow</small></article>
@@ -48,7 +53,7 @@ export default async function ContentPage() {
                   </div>
                   <div className="seoBadge"><strong>{item.seoScore}</strong><small>SEO</small></div>
                   <span className={`stageChip ${item.stage}`}>{stageLabels[item.stage]}</span>
-                  <button className="rowMenu" aria-label={`Open ${item.title}`}><ArrowUpRight size={18} /></button>
+                  <Link className="rowMenu" href={live ? `/content/${item.id}` : "/login"} aria-label={`Open ${item.title}`}><ArrowUpRight size={18} /></Link>
                 </article>
               ))}
             </div>
